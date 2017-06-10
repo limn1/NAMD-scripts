@@ -443,7 +443,7 @@ def main(**kwargs):
         alls[1], sds[1] = DoBAR(elecs_F, elecs_R, 'Elec', opt['verbose'])
         alls[0], sds[0] = DoBAR(w_F, w_R, 'Total', opt['verbose'])
     else:
-        alls[0], sds[0] = DoBAR(w_F, w_R, 'Total', opt['verbose']) # *************** !!! VTL
+        alls[0], sds[0] = DoBAR(w_F, w_R, 'Total', opt['verbose'])
 
     ### Plot results.
     if opt['plot'] == True:
