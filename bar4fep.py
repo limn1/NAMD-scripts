@@ -274,14 +274,14 @@ def hist_plot(w_F, w_R, window_F, window_R, title, outfname):
         # create subplot
         plt.subplot(gs[idx])
         # plot reverse and forward data for this window
-        plt.hist((-1* w_R[kR] ), bins=50, color='r',histtype='step')
-        plt.hist(w_F[kF], bins=50, color='b', histtype='step')
+        plt.hist((-1* w_R[kR] ), bins=100, color='r',histtype='step')
+        plt.hist(w_F[kF], bins=100, color='b', histtype='step')
         # add title and ticks for this window
-        plt.title(sbtitle, fontsize=6, color='g')
-        plt.tick_params(axis='both',labelsize=4)
+        plt.title(sbtitle, fontsize=8, color='g')
+        plt.tick_params(axis='both',labelsize=6)
         idx += 1
-    plt.subplots_adjust(top=0.85,hspace=0.85)
-    plt.suptitle(title)
+    plt.subplots_adjust(bottom=-1.15,top=1.15,hspace=0.6,wspace=0.3,right=1.3)
+    plt.suptitle(title,x=0.7,y=1.3)
 
     ### super-axis labels. locations are very finicky and likely need adjusting
 #    if numWins == 40:
@@ -290,7 +290,7 @@ def hist_plot(w_F, w_R, window_F, window_R, title, outfname):
 #    if numWins == 20:
 #        plt.text(-38.0, -260.0, '$\Delta$U (kcal/mol)', ha='center') # xlabel
 #        plt.text(-85.0, 2100.0, 'frequency', va='center', rotation='vertical') # ylabel
-    plt.savefig(outfname+'_dE-overlap.eps', format='eps')
+    plt.savefig(outfname+'_dE-overlap.eps', format='eps',bbox_inches='tight')
     plt.clf()
 
 
@@ -318,7 +318,7 @@ def dg_plot(dGs_F, dGs_R, window_F, window_R, eqTime, totTime, title, outfname):
     numWins = len(dGs_F.keys())
     if numWins == 40: gs = gridspec.GridSpec(8,5)
     elif numWins == 20: gs = gridspec.GridSpec(5,4)
-    else: print("ERROR: specified number of widnows is not currently supported (only 20 or 40)")
+    else: print("ERROR: specified number of windows is not currently supported (only 20 or 40)")
 
     ### generate ns steps for x-axis
     step=(totTime-eqTime)/((totTime-eqTime)*500.)
@@ -339,68 +339,60 @@ def dg_plot(dGs_F, dGs_R, window_F, window_R, eqTime, totTime, title, outfname):
         plt.plot(ns, -1*dGs_R[kR], color='r')
         plt.plot(ns, dGs_F[kF], color='b')
         # add title and ticks for this window
-        plt.title(sbtitle, fontsize=6, color='g')
-        plt.tick_params(axis='both',labelsize=4)
+        plt.title(sbtitle, fontsize=8, color='g')
+        plt.tick_params(axis='both',labelsize=5)
         # adjust x-axis for this window
         x1,x2,y1,y2 = plt.axis()
         plt.axis((min(ns),max(ns),y1,y2))
+        plt.grid()
         idx += 1
 
-    plt.subplots_adjust(top=0.85,hspace=0.85)
-    plt.suptitle(title)
+    plt.subplots_adjust(bottom=-1.15,top=1.15,hspace=0.6,wspace=0.3,right=1.3)
+    plt.suptitle(title,x=0.7,y=1.3)
 
     ### super-axis labels. locations are very finicky and likely need adjusting
 #    if numWins == 40:
-#        plt.text(-6.5, -1.2, 'time (ns)', ha='center') # xlabel
-#        plt.text(-20.0, 9.0, 'work (kcal/mol)', va='center', rotation='vertical') # ylabel
+#        plt.text(-6.3, -1.2, 'time (ns)', ha='center') # xlabel
+#        plt.text(-23.0, 2.0, '$\Delta$G (kcal/mol)', va='center', rotation='vertical') # ylabel
 #    if numWins == 20:
 #        plt.text(-10.0, -2.5, 'time (ns)', ha='center') # xlabel
-#        plt.text(-35.0, 6.5, 'work (kcal/mol)', va='center', rotation='vertical') # ylabel
-    plt.savefig(outfname+'_dGvTime.eps', format='eps')
+#        plt.text(-35.0, 6.5, '$\Delta$G (kcal/mol)', va='center', rotation='vertical') # ylabel
+    plt.savefig(outfname+'_dGvTime.eps', format='eps',bbox_inches='tight')
     plt.clf()
 
 
 def gbar_plot(dgs, sds, title, outfname):
 
     """
-    Plot free energy change deltaG over lambda.
+    Plot free energy change deltaG over lambda. 
+    Use dG values calculated from BAR.
 
     Parameters
     ----------
     dgs: 1D array of dGs
     sds: 1D array of standard deviations corresponding to dgs array.
-         If don't have this, just feed function a list of zeroes.
-         TODO ^ handle this more smoothly
     title: string name of the main title
     outfname: string name of the image to be saved
 
     """
-    numWins = len(dgs)
-    if numWins == 40: gs = gridspec.GridSpec(8,5)
-    elif numWins == 20: gs = gridspec.GridSpec(5,4)
-    else: print("ERROR: specified number of widnows is not currently supported (only 20 or 40)")
-
-    ### TODO
-    ### FOR SOME REASON THE ERROR BARS ARE DISPLAYING HORIZ
-    ### EVEN WHEN DEFINING yerr=sds ...
 
     lambdas = np.linspace(0., 1., len(dgs)) # for x-axis, lambda from 0 to 1
     plt.figure()
-    plt.errorbar(lambdas, dgs)
-    #plt.errorbar(lambdas, dgs, sds)
+    plt.errorbar(lambdas, dgs, yerr=sds)
     plt.title(title, fontsize=18)
     plt.xlabel("$\lambda$",fontsize=18)
     plt.ylabel("$\Delta$G (kcal/mol)",fontsize=18)
     plt.minorticks_on()
     plt.tick_params(axis='both',width=1.5,length=7,labelsize=16)
     plt.tick_params(which='minor',width=1.0,length=4)
-    plt.savefig(outfname+'_summary.eps', format='eps')
+    plt.savefig(outfname+'_summary.eps', format='eps',bbox_inches='tight')
     plt.clf()
 
 def pieces_plot(dgs, title, outfname):
 
     """
-    Plot deltaG over lambda as well as the electrostatic and vdW components.
+    Plot, as a function of lambda: (1) BAR-calculated deltaG,
+       (2) electrostatic component, (3) vdW component.
 
     Parameters
     ----------
@@ -415,7 +407,6 @@ def pieces_plot(dgs, title, outfname):
     plt.figure()
     for y, l in zip(dgs, labels):
         plt.plot(lambdas, y, label=l)
-    #plt.errorbar(lambdas, dgs, sds)
     plt.title(title, fontsize=18)
     plt.xlabel("$\lambda$",fontsize=18)
     plt.ylabel("energy (kcal/mol)",fontsize=18)
@@ -423,7 +414,7 @@ def pieces_plot(dgs, title, outfname):
     plt.minorticks_on()
     plt.tick_params(axis='both',width=1.5,length=7,labelsize=16)
     plt.tick_params(which='minor',width=1.0,length=4)
-    plt.savefig(outfname+'_int-decom.eps', format='eps')
+    plt.savefig(outfname+'_decomp.eps', format='eps',bbox_inches='tight')
     plt.clf()
 # ------------------------- Script ---------------------------- #
 
@@ -431,13 +422,13 @@ def main(**kwargs):
 
     def getdata(D, **kwargs):
         ### Read output data files and summarize results.
-        src = args.dir.rstrip('//')
-        dir = src+'/FEP_{}/results'.format(D)
-        if os.path.exists(dir) == True:
-            fepout = cat_fepout(dir, opt['outfname'], D)
+        src = args.hdir.rstrip('//')
+        hdir = src+'/FEP_{}/results'.format(D)
+        if os.path.exists(hdir) == True:
+            fepout = cat_fepout(hdir, 'results', D)
             (w_D, dGs_D, elecs_D, vdws_D, window_D) = ParseFEP(fepout)
         else:
-            raise OSError("No such file or directory '{}'".format(dir))
+            raise OSError("No such file or directory '{}'".format(hdir))
         return (w_D, dGs_D, elecs_D, vdws_D, window_D)
 
     (w_F, dGs_F, elecs_F, vdws_F, window_F) = getdata('F')
@@ -450,18 +441,18 @@ def main(**kwargs):
     if opt['decomp'] == True:
         alls[2], sds[2] = DoBAR(vdws_F, vdws_R, 'VdW', opt['verbose'])
         alls[1], sds[1] = DoBAR(elecs_F, elecs_R, 'Elec', opt['verbose'])
-        alls[0], sds[0] = DoBAR(dGs_F, dGs_R, 'Total', opt['verbose'])
+        alls[0], sds[0] = DoBAR(w_F, w_R, 'Total', opt['verbose'])
     else:
-        alls[0], sds[0] = DoBAR(dGs_F, dGs_R, 'Total', opt['verbose'])
+        alls[0], sds[0] = DoBAR(w_F, w_R, 'Total', opt['verbose'])
 
     ### Plot results.
     if opt['plot'] == True:
 
         ### Plot probability distributions and energies of fwd and rev.
         print("   Plotting probability distributions...")
-        title = 'Energy (dU) Overlap\nblue = forward | red = reverse'
+        title = 'Energy (dU) Histogram Overlap\nblue = forward | red = reverse'
         hist_plot(w_F, w_R, window_F, window_R, title, opt['outfname'])
-        title = 'Time evolution of free energy (dG)\nblue = forward | red = reverse'
+        title = 'Free energy (dG) vs. time (ns)\nblue = forward | red = reverse'
         dg_plot(dGs_F, dGs_R, window_F, window_R, float(args.eqTime), float(args.totTime), title, opt['outfname'])
 
         ### plot BAR summary results
@@ -474,20 +465,20 @@ def main(**kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--dir",
+    parser.add_argument("-d", "--hdir",
                         help="Location with both FEP_F and FEP_R directories")
-    parser.add_argument("-e", "--eqTime",
-                        help="Nanoseconds of equilibration time per window")
-    parser.add_argument("-t", "--totTime",
-                        help="Nanoseconds of total (including equil) time per window")
-    parser.add_argument("-o", "--outfname", default='results',
-                        help="Base name of saved plots")
-    parser.add_argument("-p", "--plot", action="store_true",
-                        help="Generate free energy plots")
-    parser.add_argument("--decomp", action="store_true", default=False,
-                        help="Decompose free energies into electrostatic and vdW components")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                         help="Increase output verbosity")
+    parser.add_argument("-p", "--plot", action="store_true",
+                        help="Generate energy histograms and free energy plots.")
+    parser.add_argument("-o", "--outfname", default='plot',
+                        help="Base name of saved plots")
+    parser.add_argument("-e", "--eqTime",
+                        help="For dG window plot: Nanoseconds of equilibration time per window")
+    parser.add_argument("-t", "--totTime",
+                        help="For dG window plot: Nanoseconds of total (including equil) time per window")
+    parser.add_argument("--decomp", action="store_true", default=False,
+                        help="Decompose free energies into electrostatic and vdW components")
 
     args = parser.parse_args()
     opt = vars(args)
