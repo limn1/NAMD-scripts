@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 
 ### !!! Python3 Version !!!
-### Purpose: Analyze FEP simulations from NAMD.
-### Example: python FEP_BARanalysis.py -d /path/containing/FEPFandFEPR/ -e 1 -t 10 -p -v > output.dat
+### Purpose: Analyze FEP simulations from NAMD using Bennett acceptance ratio.
+### Example: python bar4fep.py -d /path/containing/FEPFandFEPR/ -v -p -e 1 -t 10 > output.dat
 ### Written by: Victoria Lim @ Mobley Lab UCI
 
-### Assumptions: all N windows are equally distributed for each of fwd and rev transformations
-### For the dG window plots, assumes 2 fs/step and alchOutFreq = 1000.
-### Note: This script was made in accordance with VMD's ParseFEP plugin:
-#    Extensions > Analysis > Analyze FEP simulation
-#    with respect to the prob histograms and free energy plots.
-#    Hence the reversed traversal and -1*[] of the reverse FEP data.
-#    If going forward takes x kcal/mol, going backward should take -x kcal/mol.
+### Assumptions: equally distributed fwd and rev windows; 2 fs/step, alchOutFreq = 1000.
+### Note: This script was made in accordance with VMD's ParseFEP plugin's
+#     dE prob histograms and free energy plots.
+#   For rev data, uses reversed traversal and -1*[].
+#     If going forward takes x kcal/mol, going backward should take -x kcal/mol.
 
-### Bennett acceptance ratio (BAR) method is used to compute
-#    total free energy difference. See documentation here:
-#    https://github.com/choderalab/pymbar/blob/master/pymbar/bar.py
+### Documentation for BAR:
+#     https://github.com/choderalab/pymbar/blob/master/pymbar/bar.py
+
+### If ValueError is returned during plot when startStep is specified,
+#     make sure (-e and -t) matches range of (startStep to end).
+#     E.g., `-e 4 -t 5 -s 1999000`
 
 from pymbar import BAR
 from pymbar import timeseries
@@ -80,7 +81,7 @@ def cat_fepout(fep_dir, label, D):
    return outfile
 
 
-def ParseFEP( fep_file ):
+def ParseFEP( fep_file, startStep=None ):
 
     """
     Parse summary *.fepout files and return relevant data as dictionaries.
@@ -89,6 +90,8 @@ def ParseFEP( fep_file ):
     ----------
     fep_file: string. Filename of the summarized results of all
                       *.fepout results in fep_dir.
+    startStep: string of integer. Read fepout files starting from this timestep
+               (follows the FepEnergy: column)
 
     Returns
     -------
@@ -146,7 +149,9 @@ def ParseFEP( fep_file ):
           tempVdw.append(float(l[5])-float(l[4]))
 
        # turn parsing on at section 'STARTING COLLECTION OF ENSEMBLE AVERAGE'
-       if '#STARTING' in l:
+       if '#STARTING' in l and startStep is None:
+          parsing = True
+       elif startStep==l[1]: 
           parsing = True
 
     return dEs_dict, dGs_dict, elecs_dict, vdws_dict, window
@@ -426,7 +431,7 @@ def main(**kwargs):
         hdir = src+'/FEP_{}/results'.format(D)
         if os.path.exists(hdir) == True:
             fepout = cat_fepout(hdir, 'results', D)
-            (w_D, dGs_D, elecs_D, vdws_D, window_D) = ParseFEP(fepout)
+            (w_D, dGs_D, elecs_D, vdws_D, window_D) = ParseFEP(fepout, args.startStep)
         else:
             raise OSError("No such file or directory '{}'".format(hdir))
         return (w_D, dGs_D, elecs_D, vdws_D, window_D)
@@ -473,6 +478,8 @@ if __name__ == "__main__":
                         help="Generate energy histograms and free energy plots.")
     parser.add_argument("-o", "--outfname", default='plot',
                         help="Base name of saved plots")
+    parser.add_argument("-s", "--startStep", default=None,
+                        help="Read fepout files starting from this timestep.")
     parser.add_argument("-e", "--eqTime",
                         help="For dG window plot: Nanoseconds of equilibration time per window")
     parser.add_argument("-t", "--totTime",
