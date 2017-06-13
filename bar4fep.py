@@ -6,13 +6,13 @@
 ### Written by: Victoria Lim @ Mobley Lab UCI
 
 ### Assumptions: equally distributed fwd and rev windows; 2 fs/step, alchOutFreq = 1000.
-### Note: This script was made in accordance with VMD's ParseFEP plugin
-#    with respect to dE prob histograms and free energy plots.
+### Note: This script was made in accordance with VMD's ParseFEP plugin's
+#     dE prob histograms and free energy plots.
 #   For rev data, uses reversed traversal and -1*[].
-#    If going forward takes x kcal/mol, going backward should take -x kcal/mol.
+#     If going forward takes x kcal/mol, going backward should take -x kcal/mol.
 
-### Documutation for BAR:
-#    https://github.com/choderalab/pymbar/blob/master/pymbar/bar.py
+### Documentation for BAR:
+#     https://github.com/choderalab/pymbar/blob/master/pymbar/bar.py
 
 ### If ValueError is returned during plot when startStep is specified,
 #     make sure (-e and -t) matches range of (startStep to end).
